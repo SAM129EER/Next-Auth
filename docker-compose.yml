@@ -1,0 +1,43 @@
+# Docker Compose file (no version needed in modern Docker)
+
+services:
+  # 🐘 PostgreSQL Database Service
+  db:
+    image: postgres:17  # Use PostgreSQL v17 (stable + modern)
+    container_name: postgres_db  # Custom name for container
+    restart: always  # Auto-restart if container stops
+
+    environment:
+      POSTGRES_USER: sameer       # DB username
+      POSTGRES_PASSWORD: sam129eer  # DB password
+      POSTGRES_DB: auth_db     # Default database created on start
+
+    ports:
+      - "5432:5432"  # Expose DB to your machine (localhost:5432)
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+      # Persist database data (VERY IMPORTANT)
+      # Without this, data is lost when container stops
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sameer"]  # Check if DB is ready
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 🖥️ Adminer (Database UI)
+  adminer:
+    image: adminer:latest  # Lightweight DB management UI
+    container_name: adminer_ui
+    restart: always
+
+    ports:
+      - "8080:8080"  # Open Adminer at http://localhost:8080
+
+    depends_on:
+      - db  # Start DB before Adminer
+
+# 📦 Named volume for persistent storage
+volumes:
+  postgres_data:
