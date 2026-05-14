@@ -19,7 +19,7 @@ export async function getCurrentUser() {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: decoded.userId ,
+      id: decoded.userId,
     },
   });
 

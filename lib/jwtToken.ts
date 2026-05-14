@@ -6,9 +6,9 @@ export const generateToken = (userId: string) => {
   return token;
 };
 export const verifyToken = (token: string) => {
- try{
-  return jwt.verify(token, JWT_SECRET) as {userId : string};
- }catch{
-   return null;
- }
+  try {
+    return jwt.verify(token, JWT_SECRET) as { userId: string };
+  } catch {
+    return null;
+  }
 };

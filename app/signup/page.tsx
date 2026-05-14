@@ -11,6 +11,7 @@ import { signupSchema } from "@/lib/zodSchema";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import {
   Card,
   CardContent,
@@ -19,11 +20,20 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+
 type SignupData = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const [show, setShow] = useState(false);
-const router = useRouter();
+
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -32,18 +42,13 @@ const router = useRouter();
     resolver: zodResolver(signupSchema),
   });
 
- const onSubmit = async (
-  data: SignupData
-) => {
-  try {
-    const response = await fetch(
-      "/api/auth/signup",
-      {
+  const onSubmit = async (data: SignupData) => {
+    try {
+      const response = await fetch("/api/auth/signup", {
         method: "POST",
 
         headers: {
-          "Content-Type":
-            "application/json",
+          "Content-Type": "application/json",
         },
 
         body: JSON.stringify({
@@ -51,102 +56,153 @@ const router = useRouter();
           lastName: data.last,
           email: data.email,
           password: data.password,
-          confirmPassword:
-            data.confirmPassword,
+          confirmPassword: data.confirmPassword,
         }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error);
       }
-    );
 
-    const result =
-      await response.json();
+      console.log(result);
 
-    if (!response.ok) {
-      throw new Error(
-        result.error
-      );
+      router.push("/login");
+    } catch (error: any) {
+      console.error(error);
+
+      alert(error.message);
     }
-
-    console.log(result);
-  router.push("/login");
-  
-  } catch (error: any) {
-    console.error(error);
-
-    alert(error.message);
-  }
-};
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
-        <Card className="p-6 space-y-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="w-full max-w-md"
+      >
+        <Card className="p-6">
           <CardHeader>
-            <CardTitle className="text-center text-xl">
+            <CardTitle className="text-center text-2xl">
               Create Account
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <div className="w-full">
-                <Input placeholder="First Name" {...register("first")} />
+          <CardContent className="space-y-3">
+            
+            {/* First + Last Name */}
+            <FieldGroup className="grid grid-cols-2 gap-3">
+              
+              <Field>
+                <FieldLabel>First Name</FieldLabel>
+
+                <Input
+                  placeholder="First Name"
+                  {...register("first")}
+                />
+
                 {errors.first && (
-                  <p className="text-red-500 text-sm">{errors.first.message}</p>
+                  <FieldError>
+                    {errors.first.message}
+                  </FieldError>
                 )}
-              </div>
+              </Field>
 
-              <div className="w-full">
-                <Input placeholder="Last Name" {...register("last")} />
+              <Field>
+                <FieldLabel>Last Name</FieldLabel>
+
+                <Input
+                  placeholder="Last Name"
+                  {...register("last")}
+                />
+
                 {errors.last && (
-                  <p className="text-red-500 text-sm">{errors.last.message}</p>
+                  <FieldError>
+                    {errors.last.message}
+                  </FieldError>
                 )}
-              </div>
-            </div>
+              </Field>
 
-            <Input type="email" placeholder="Email" {...register("email")} />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
+            </FieldGroup>
 
-            <div className="space-y-2">
+            {/* Email */}
+            <Field>
+              <FieldLabel>Email</FieldLabel>
+
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                {...register("email")}
+              />
+
+              {errors.email && (
+                <FieldError>
+                  {errors.email.message}
+                </FieldError>
+              )}
+            </Field>
+
+            {/* Password */}
+            <Field>
+              <FieldLabel>Password</FieldLabel>
+
               <div className="flex gap-2">
                 <Input
                   type={show ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="Enter password"
                   {...register("password")}
                 />
-                <Button type="button" onClick={() => setShow(!show)}>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShow(!show)}
+                >
                   {show ? "Hide" : "Show"}
                 </Button>
               </div>
 
               {errors.password && (
-                <p className="text-red-500 text-sm">
+                <FieldError>
                   {errors.password.message}
-                </p>
+                </FieldError>
               )}
+            </Field>
+
+            {/* Confirm Password */}
+            <Field>
+              <FieldLabel>Confirm Password</FieldLabel>
 
               <Input
                 type={show ? "text" : "password"}
-                placeholder="Confirm Password"
+                placeholder="Confirm password"
                 {...register("confirmPassword")}
               />
 
               {errors.confirmPassword && (
-                <p className="text-red-500 text-sm">
+                <FieldError>
                   {errors.confirmPassword.message}
-                </p>
+                </FieldError>
               )}
-            </div>
+            </Field>
 
-            <Button className="w-full" disabled={isSubmitting}>
+            {/* Submit */}
+            <Button
+              className="w-full"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Creating..." : "Sign Up"}
             </Button>
           </CardContent>
 
-          <CardFooter className="text-sm text-center justify-center">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-500 ml-1">
+          <CardFooter className="justify-center text-sm">
+            Already have an account?
+            
+            <Link
+              href="/login"
+              className="ml-1 text-blue-500 hover:underline"
+            >
               Login
             </Link>
           </CardFooter>

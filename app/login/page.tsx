@@ -14,7 +14,9 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
+  CardDescription,
 } from "@/components/ui/card";
+import { useState } from "react";
 
 type LoginData = {
   email: string;
@@ -22,6 +24,11 @@ type LoginData = {
 };
 
 export default function Login() {
+  const [show, setShow] = useState(false)
+  // const showPassword = ()=>{
+
+  // }
+
   const {
     register,
     handleSubmit,
@@ -31,47 +38,43 @@ export default function Login() {
   });
   const router = useRouter();
 
- const onSubmit = async (
-  data: LoginData
-) => {
-  try {
-    const response = await fetch(
-      "/api/auth/login",
-      {
-        method: "POST",
+  const onSubmit = async (data: LoginData) => {
+    try {
+      const response = await fetch(
+        "/api/auth/login",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type":
-            "application/json",
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        body: JSON.stringify(
-          data
-        ),
-      }
-    );
-
-    const result =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.error
+          body: JSON.stringify(
+            data
+          ),
+        }
       );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.error
+        );
+      }
+
+      console.log(result);
+
+      // Redirect after login
+      router.push(
+        "/dashboard"
+      );
+    } catch (error: any) {
+      console.error(error);
+
+      alert(error.message);
     }
-
-    console.log(result);
-
-    // Redirect after login
-    router.push(
-      "/dashboard"
-    );
-  } catch (error: any) {
-    console.error(error);
-
-    alert(error.message);
-  }
-};
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -80,27 +83,34 @@ export default function Login() {
           <CardHeader>
             <CardTitle className="text-center text-xl">Login</CardTitle>
           </CardHeader>
+          <CardDescription className="text-center">
+            login to start
+          </CardDescription>
 
           <CardContent className="space-y-4">
             <div>
               <Input type="email" placeholder="Email" {...register("email")} />
               {errors.email && (
-                <p className="text-red-500 text-sm">{errors.email.message}</p>
+                <p className="text-red-500 p-1 text-sm">{errors.email.message}</p>
               )}
             </div>
-
             <div>
-              <Input
-                type="password"
-                placeholder="Password"
-                {...register("password")}
-              />
+              <div className="flex gap-2">
+                <Input
+                  type={show ? "text" : "password"}
+                  placeholder="Password"
+                  {...register("password")}
+                />
+                <Button onClick={() => setShow(!show)} type="button" >{show ? "Hide" : "Show"}</Button>
+              </div>
+
               {errors.password && (
-                <p className="text-red-500 text-sm">
+                <p className="text-red-500 p-1 text-sm">
                   {errors.password.message}
                 </p>
               )}
             </div>
+
 
             <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Logging in..." : "Login"}
