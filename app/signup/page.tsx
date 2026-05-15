@@ -92,7 +92,7 @@ export default function Signup() {
           <CardContent className="space-y-3">
             
             {/* First + Last Name */}
-            <FieldGroup className="grid grid-cols-2 gap-3">
+            <FieldGroup className="grid grid-cols-2 gap-2">
               
               <Field>
                 <FieldLabel>First Name</FieldLabel>
@@ -147,14 +147,13 @@ export default function Signup() {
             <Field>
               <FieldLabel>Password</FieldLabel>
 
-              <div className="flex gap-2">
+              <div className="">
                 <Input
                   type={show ? "text" : "password"}
                   placeholder="Enter password"
                   {...register("password")}
                 />
-
-                <Button
+               <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShow(!show)}
@@ -162,7 +161,6 @@ export default function Signup() {
                   {show ? "Hide" : "Show"}
                 </Button>
               </div>
-
               {errors.password && (
                 <FieldError>
                   {errors.password.message}

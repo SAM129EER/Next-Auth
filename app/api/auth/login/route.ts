@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { comparePassword } from "@/lib/password";
 import { generateToken } from "@/lib/jwtToken";
-import { loginSchema } from "@/lib/validation-backend/auth";
+import { loginSchema } from "@/lib/zodSchema";
 import { cookies } from "next/headers";
 
 export async function POST(req: Request) {

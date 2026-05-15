@@ -1,12 +1,12 @@
 import { hashPassword } from "@/lib/password";
-import { signupSchema } from "@/lib/validation-backend/auth";
+import { signupSchema } from "@/lib/zodSchema";
 import { prisma } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const validatedData = signupSchema.parse(body);
-    const { firstName, lastName, email, password } = validatedData;
+    const { first, last, email, password } = validatedData;
 
     const existingUser = await prisma.user.findUnique({
       where: {
@@ -21,8 +21,8 @@ export async function POST(req: Request) {
     const hashedPassword = await hashPassword(password);
     const newUser = await prisma.user.create({
       data: {
-        firstName,
-        lastName,
+        first,
+        last,
         email,
         password: hashedPassword,
       },
@@ -32,8 +32,8 @@ export async function POST(req: Request) {
         message: "User created successfully",
         user: {
           id: newUser.id,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
+          first: newUser.first,
+          last: newUser.last,
           email: newUser.email,
         },
       },
