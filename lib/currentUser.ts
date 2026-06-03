@@ -4,7 +4,6 @@ import { verifyToken } from "./jwtToken";
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();
-
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
@@ -16,13 +15,11 @@ export async function getCurrentUser() {
   if (!decoded) {
     return null;
   }
-
   const user = await prisma.user.findUnique({
     where: {
-      id: decoded.userId,
+      id: decoded.Id,
     },
   });
-
   if (!user) {
     return null;
   }

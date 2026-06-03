@@ -1,8 +1,7 @@
 import { getCurrentUser } from "@/lib/currentUser";
 
 export async function GET() {
-  const user =
-    await getCurrentUser();
+  const user = await getCurrentUser();
 
   // Not logged in
   if (!user) {
@@ -10,7 +9,7 @@ export async function GET() {
       {
         error: "Unauthorized",
       },
-      { status: 401 }
+      { status: 401 },
     );
   }
 

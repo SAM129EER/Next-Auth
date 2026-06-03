@@ -6,9 +6,7 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { signupSchema } from "@/lib/zodSchema";
-
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -31,7 +29,6 @@ type SignupData = z.infer<typeof signupSchema>;
 
 export default function Signup() {
   const [show, setShow] = useState(false);
-
   const router = useRouter();
 
   const {
@@ -46,11 +43,9 @@ export default function Signup() {
     try {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
           firstName: data.first,
           lastName: data.last,
@@ -78,10 +73,7 @@ export default function Signup() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-md"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
         <Card className="p-6">
           <CardHeader>
             <CardTitle className="text-center text-2xl">
@@ -90,40 +82,25 @@ export default function Signup() {
           </CardHeader>
 
           <CardContent className="space-y-3">
-            
             {/* First + Last Name */}
             <FieldGroup className="grid grid-cols-2 gap-2">
-              
               <Field>
                 <FieldLabel>First Name</FieldLabel>
 
-                <Input
-                  placeholder="First Name"
-                  {...register("first")}
-                />
+                <Input placeholder="First Name" {...register("first")} />
 
                 {errors.first && (
-                  <FieldError>
-                    {errors.first.message}
-                  </FieldError>
+                  <FieldError>{errors.first.message}</FieldError>
                 )}
               </Field>
 
               <Field>
                 <FieldLabel>Last Name</FieldLabel>
 
-                <Input
-                  placeholder="Last Name"
-                  {...register("last")}
-                />
+                <Input placeholder="Last Name" {...register("last")} />
 
-                {errors.last && (
-                  <FieldError>
-                    {errors.last.message}
-                  </FieldError>
-                )}
+                {errors.last && <FieldError>{errors.last.message}</FieldError>}
               </Field>
-
             </FieldGroup>
 
             {/* Email */}
@@ -136,11 +113,7 @@ export default function Signup() {
                 {...register("email")}
               />
 
-              {errors.email && (
-                <FieldError>
-                  {errors.email.message}
-                </FieldError>
-              )}
+              {errors.email && <FieldError>{errors.email.message}</FieldError>}
             </Field>
 
             {/* Password */}
@@ -153,7 +126,7 @@ export default function Signup() {
                   placeholder="Enter password"
                   {...register("password")}
                 />
-               <Button
+                <Button
                   type="button"
                   variant="outline"
                   onClick={() => setShow(!show)}
@@ -162,9 +135,7 @@ export default function Signup() {
                 </Button>
               </div>
               {errors.password && (
-                <FieldError>
-                  {errors.password.message}
-                </FieldError>
+                <FieldError>{errors.password.message}</FieldError>
               )}
             </Field>
 
@@ -179,28 +150,19 @@ export default function Signup() {
               />
 
               {errors.confirmPassword && (
-                <FieldError>
-                  {errors.confirmPassword.message}
-                </FieldError>
+                <FieldError>{errors.confirmPassword.message}</FieldError>
               )}
             </Field>
 
             {/* Submit */}
-            <Button
-              className="w-full"
-              disabled={isSubmitting}
-            >
+            <Button className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Creating..." : "Sign Up"}
             </Button>
           </CardContent>
 
           <CardFooter className="justify-center text-sm">
             Already have an account?
-            
-            <Link
-              href="/login"
-              className="ml-1 text-blue-500 hover:underline"
-            >
+            <Link href="/login" className="ml-1 text-blue-500 hover:underline">
               Login
             </Link>
           </CardFooter>
