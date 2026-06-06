@@ -21,8 +21,8 @@ export async function POST(req: Request) {
     const hashedPassword = await hashPassword(password);
     const newUser = await prisma.user.create({
       data: {
-        first,
-        last,
+        firstName: first,
+        lastName: last,
         email,
         password: hashedPassword,
       },
@@ -32,8 +32,8 @@ export async function POST(req: Request) {
         message: "User created successfully",
         user: {
           id: newUser.id,
-          first: newUser.first,
-          last: newUser.last,
+          first: newUser.firstName,
+          last: newUser.lastName,
           email: newUser.email,
         },
       },
