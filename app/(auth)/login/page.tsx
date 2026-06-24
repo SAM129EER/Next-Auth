@@ -77,7 +77,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md">
         <Card className="p-6 space-y-4">
           <CardHeader>
