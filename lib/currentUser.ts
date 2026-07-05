@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
-import { verifyToken } from "./jwtToken";
+import { verifyToken } from "./password";
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();

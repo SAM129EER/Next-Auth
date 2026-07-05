@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifyToken } from "@/lib/jwtToken";
+import { verifyToken } from "@/lib/password";
 
 export function proxy(request: NextRequest) {
   // Get token
