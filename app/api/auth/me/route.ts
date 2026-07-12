@@ -1,25 +1,32 @@
-import { getCurrentUser } from "@/lib/currentUser";
+import { NextResponse } from "next/server";
+import { getCurrentUser } from "@/lib/auth/getCurrentUser";
 
 export async function GET() {
-  const user = await getCurrentUser();
+  try {
+    const user = await getCurrentUser();
 
-  // Not logged in
-  if (!user) {
-    return Response.json(
-      {
-        error: "Unauthorized",
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        verified: user.verified,
       },
-      { status: 401 },
+    });
+  } catch (error: any) {
+    console.error("GetCurrentUser API error:", error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
     );
   }
-
-  return Response.json({
-    user: {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-    },
-  });
 }

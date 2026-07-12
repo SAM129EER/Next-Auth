@@ -1,73 +1,96 @@
-import { prisma } from "@/lib/db";
-import { comparePassword } from "@/lib/password";
-import { generateToken } from "@/lib/jwtToken";
-import { loginSchema } from "@/lib/zodSchema";
-import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db/prisma";
+import { comparePassword } from "@/lib/auth/password";
+import { generateAccessToken, generateRefreshToken } from "@/lib/auth/tokens";
+import { loginSchema } from "@/lib/validators/auth";
+import { setAuthCookies } from "@/lib/auth/cookies";
+import { rateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+import { RATE_LIMITS, REFRESH_TOKEN_MAX_AGE } from "@/lib/constants";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
+  const limitResult = await rateLimit(`login:${ip}`, RATE_LIMITS.LOGIN.limit, RATE_LIMITS.LOGIN.windowSeconds);
+  const headers = getRateLimitHeaders(limitResult);
+
+  if (!limitResult.success) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again later." },
+      { status: 429, headers }
+    );
+  }
+
   try {
     const body = await req.json();
-
-    // Validate input
     const validatedData = loginSchema.parse(body);
-
     const { email, password } = validatedData;
 
-    // Find user
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     if (!user) {
-      return Response.json(
-        {
-          error: "Invalid credentials",
-        },
-        { status: 401 },
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401, headers }
       );
     }
 
-    // Compare password
     const isPasswordCorrect = await comparePassword(password, user.password);
 
     if (!isPasswordCorrect) {
-      return Response.json(
-        {
-          error: "Invalid credentials",
-        },
-        { status: 401 },
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401, headers }
       );
     }
 
-    // Generate JWT
-    const token = generateToken(user.id);
+    // Check email verification status
+    if (!user.verified) {
+      return NextResponse.json(
+        {
+          error: "Your email address is not verified. Please verify your email before logging in.",
+          needsVerification: true,
+        },
+        { status: 403, headers }
+      );
+    }
 
-    // Store in cookie
-    const cookieStore = await cookies();
+    // Generate JWT access & refresh tokens
+    const tokenId = crypto.randomUUID();
+    const accessToken = generateAccessToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id, tokenId);
 
-    cookieStore.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-      path: "/",
-    });
-
-    return Response.json({
-      message: "Login successful",
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
+    // Save refresh token to database
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000),
       },
     });
-  } catch (error: any) {
-    return Response.json(
+
+    // Set HttpOnly cookies (access + refresh)
+    await setAuthCookies(accessToken, refreshToken);
+
+    return NextResponse.json(
       {
-        error: error?.message || "Something went wrong",
+        message: "Login successful",
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+        },
       },
-      { status: 500 },
+      { headers }
+    );
+  } catch (error: any) {
+    console.error("Login error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Something went wrong" },
+      { status: 500, headers }
     );
   }
 }
